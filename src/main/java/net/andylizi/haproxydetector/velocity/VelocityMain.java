@@ -28,10 +28,8 @@ import java.util.NoSuchElementException;
 
 import static net.andylizi.haproxydetector.ReflectionUtil.sneakyThrow;
 
-@Plugin(id = "haproxy-detector", name = "HAProxyDetector", version = "3.1.0-SNAPSHOT",
-    url = "https://github.com/andylizi/haproxy-detector",
-    description = "Enables proxied and direct connections both at the same time.",
-    authors = {"andylizi"})
+@Plugin(id = "haproxy-detector", name = "HAProxyDetector", version = "3.1.0-SNAPSHOT", url = "https://github.com/andylizi/haproxy-detector", description = "Enables proxied and direct connections both at the same time.", authors = {
+        "andylizi" })
 public final class VelocityMain {
     private final ProxyServer server;
     private final Logger logger;
@@ -39,7 +37,8 @@ public final class VelocityMain {
     private final Metrics.Factory metricsFactory;
 
     @Inject
-    public VelocityMain(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
+    public VelocityMain(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory,
+            Metrics.Factory metricsFactory) {
         this.server = server;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
@@ -55,7 +54,8 @@ public final class VelocityMain {
             logger.error("!!! ==============================");
         }
 
-        ProxyWhitelist whitelist = ProxyWhitelist.loadOrDefault(this.dataDirectory.resolve("whitelist.conf")).orElse(null);
+        ProxyWhitelist whitelist = ProxyWhitelist.loadOrDefault(this.dataDirectory.resolve("whitelist.conf"))
+                .orElse(null);
         if (whitelist == null) {
             logger.warn("!!! ==============================");
             logger.warn("!!! Proxy whitelist is disabled in the config.");
@@ -91,11 +91,11 @@ public final class VelocityMain {
         Object holder = cmType.getMethod("getServerChannelInitializer").invoke(connectionManager);
         Class<?> holderType = holder.getClass();
 
-        @SuppressWarnings("unchecked") ChannelInitializer<Channel> originalInitializer =
-            (ChannelInitializer<Channel>) holderType.getMethod("get").invoke(holder);
+        @SuppressWarnings("unchecked")
+        ChannelInitializer<Channel> originalInitializer = (ChannelInitializer<Channel>) holderType.getMethod("get")
+                .invoke(holder);
 
-        DetectorInitializer<Channel> newInitializer =
-            new DetectorInitializer<>(logger, originalInitializer);
+        DetectorInitializer<Channel> newInitializer = new DetectorInitializer<>(logger, originalInitializer);
         MethodHandle set = MethodHandles.lookup().unreflect(holderType.getMethod("set", ChannelInitializer.class));
         try {
             logger.info("Replacing channel initializer; you can safely ignore the following warning.");

@@ -57,11 +57,9 @@ public final class BukkitMain extends JavaPlugin {
         String plVersion = ProtocolLibrary.getPlugin().getDescription().getVersion();
 
         try {
-            if (ReflectionUtil.hasClass("com.comphenix.protocol.injector.netty.ProtocolInjector")) {
-                injectionStrategy = createInjectionStrategy1();
-            } else if (ReflectionUtil.hasClass(
+            if (ReflectionUtil.hasClass(
                     "com.comphenix.protocol.injector.netty.manager.NetworkManagerInjector")) {
-                injectionStrategy = createInjectionStrategy2();
+                injectionStrategy = new InjectionStrategy2(logger);
             } else {
                 throw new UnsupportedOperationException("unsupported ProtocolLib version " + plVersion);
             }
@@ -83,16 +81,6 @@ public final class BukkitMain extends JavaPlugin {
         }
     }
 
-    // Use separated methods to make sure the strategy classes won't be loaded
-    // until they're actually used.
-    private static InjectionStrategy createInjectionStrategy1() throws ReflectiveOperationException {
-        return new InjectionStrategy1(logger);
-    }
-
-    private static InjectionStrategy createInjectionStrategy2() throws ReflectiveOperationException {
-        return new InjectionStrategy2(logger);
-    }
-
     @Override
     public void onDisable() {
         if (injectionStrategy != null) {
@@ -105,7 +93,8 @@ public final class BukkitMain extends JavaPlugin {
 
     @SuppressWarnings("unchecked")
     static ChannelHandler getNetworkManager(ChannelPipeline pipeline) {
-        Class<? extends ChannelHandler> networkManagerClass = (Class<? extends ChannelHandler>) MinecraftReflection.getNetworkManagerClass();
+        Class<? extends ChannelHandler> networkManagerClass = (Class<? extends ChannelHandler>) MinecraftReflection
+                .getNetworkManagerClass();
         ChannelHandler networkManager = null;
         for (Map.Entry<String, ChannelHandler> entry : pipeline) {
             if (networkManagerClass.isAssignableFrom(entry.getValue().getClass())) {
